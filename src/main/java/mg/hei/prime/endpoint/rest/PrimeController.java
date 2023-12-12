@@ -1,9 +1,17 @@
-import java.math.BigInteger;
+package mg.hei.prime.endpoint.rest;
 
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.math.BigInteger;
+import java.util.Random;
+
+@RestController
 public class PrimeController {
-    @GetMapping("new-prime"){
-        public BigInteger primeNumber = BigInteger.probablePrime(10000, new Random());
-        return primeNumber
+
+    @GetMapping("new-prime")
+    public String generateNewPrime() {
+        BigInteger primeNumber = BigInteger.probablePrime(10000, new Random());
+        return primeNumber.toString();
     }
 }
-/*Implémentez puis déployez en preprod GET /new-prime, qui retourne un nombre probablement premier à 10_000 bits grâce à BigInteger::probablePrime. */

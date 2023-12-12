@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: poja-prime - Computation and API
+Description: poja - Computation and API
 
 Globals:
   Function:
@@ -17,18 +17,18 @@ Globals:
       SecurityGroupIds:
         - !Sub '{{resolve:ssm:/poja/sg/id}}'
       SubnetIds:
-        - !Sub '{{resolve:ssm:poja/subnet/private1/id}}'
-        - !Sub '{{resolve:ssm:poja/subnet/private2/id}}'
+        - !Sub '{{resolve:ssm:/poja/subnet1/id}}'
+        - !Sub '{{resolve:ssm:/poja/subnet2/id}}'
     Environment:
       Variables:
         ENV: !Ref Env
-        AWS_SQS_QUEUE_URL: !Sub '{{resolve:ssm:/poja-prime/${Env}/sqs/mailbox-queue-url}}'
-        AWS_EVENTBRIDGE_BUS: !Sub '{{resolve:ssm:/poja-prime/${Env}/eventbridge/bus-name}}'
-        AWS_S3_BUCKET: !Sub '{{resolve:ssm:/poja-prime/${Env}/s3/bucket-name}}'
+        AWS_SQS_QUEUE_URL: !Sub '{{resolve:ssm:/poja/${Env}/sqs/mailbox-queue-url}}'
+        AWS_EVENTBRIDGE_BUS: !Sub '{{resolve:ssm:/poja/${Env}/eventbridge/bus-name}}'
+        AWS_S3_BUCKET: !Sub '{{resolve:ssm:/poja/${Env}/s3/bucket-name}}'
         AWS_SES_SOURCE: noreply@nowhere.com
-        DATABASE_URL: !Sub '{{resolve:ssm:/poja-prime/${Env}/db/url}}'
-        DATABASE_USERNAME: !Sub '{{resolve:ssm:/poja-prime/${Env}/db/username}}'
-        DATABASE_PASSWORD: !Sub '{{resolve:ssm:/poja-prime/${Env}/db/password}}'
+        DATABASE_URL: !Sub '{{resolve:ssm:/poja/${Env}/db/url}}'
+        DATABASE_USERNAME: !Sub '{{resolve:ssm:/poja/${Env}/db/username}}'
+        DATABASE_PASSWORD: !Sub '{{resolve:ssm:/poja/${Env}/db/password}}'
         
 
 Parameters:
@@ -39,9 +39,9 @@ Resources:
   FrontalFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: mg.hei.prime.ApiEventHandler::handleRequest
+      Handler: com.mialitina.base.ApiEventHandler::handleRequest
       MemorySize: 512
-      Role: !Sub '{{resolve:ssm:/poja-prime/${Env}/execution/role-arn}}'
+      Role: !Sub '{{resolve:ssm:/poja/${Env}/execution/role-arn}}'
       Events:
         ApiCall:
           Type: Api
@@ -52,14 +52,14 @@ Resources:
   WorkerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: mg.hei.prime.MailboxEventHandler::handleRequest
+      Handler: com.mialitina.base.MailboxEventHandler::handleRequest
       MemorySize: 1024
-      Role: !Sub '{{resolve:ssm:/poja-prime/${Env}/execution/role-arn}}'
+      Role: !Sub '{{resolve:ssm:/poja/${Env}/execution/role-arn}}'
       Events:
         AllEvents:
           Type: SQS
           Properties:
-            Queue: !Sub '{{resolve:ssm:/poja-prime/${Env}/sqs/mailbox-queue-arn}}'
+            Queue: !Sub '{{resolve:ssm:/poja/${Env}/sqs/mailbox-queue-arn}}'
             BatchSize: 5
 
   ApplicationResourceGroup:
@@ -78,7 +78,7 @@ Resources:
   ApiUrlSSM:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: !Join [ '', [ /poja-prime/, !Ref Env, /api/url ] ]
+      Name: !Join [ '', [ /poja/, !Ref Env, /api/url ] ]
       Type: String
       Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
 

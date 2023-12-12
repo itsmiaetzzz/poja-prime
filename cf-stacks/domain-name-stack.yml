@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: poja-prime - Domain name
+Description: poja - Domain name
 
 Parameters:
   DomainName:
